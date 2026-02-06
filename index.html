@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calcul garde d’enfant</title>
+
+<style>
+  :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  body{margin:0;background:#f6f7fb;color:#111}
+  .wrap{max-width:980px;margin:0 auto;padding:16px}
+  h1{margin:0;font-size:20px}
+  h2{margin:0 0 10px;font-size:14px;opacity:.85}
+
+  .card{background:#fff;border-radius:16px;padding:14px;margin-top:12px;
+        box-shadow:0 6px 22px rgba(0,0,0,.06)}
+
+  .form{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:520px){.form{grid-template-columns:1fr 1fr}}
+
+  label{display:grid;gap:6px;font-size:12px;opacity:.85}
+  input,select{
+    width:100%;padding:12px;border-radius:12px;border:1px solid #e2e6ef;
+    font-size:16px;box-sizing:border-box
+  }
+
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  button{border:0;border-radius:12px;padding:12px 14px;font-size:15px}
+  .primary{background:#111;color:#fff}
+  .ghost{background:#eef1f8}
+
+  .results-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  @media(min-width:520px){
+    .results-grid{
+      grid-template-columns:1fr 1fr;
+    }
+  }
+
+  .kpi{
+    padding:12px;
+    border-radius:14px;
+    background:#f7f8ff;
+    border:1px solid #e7e9ff;
+  }
+  .kpi .t{font-size:12px;opacity:.75}
+  .kpi .v{font-size:22px;font-weight:700}
+
+  .hint{font-size:12px;opacity:.7;margin-top:8px}
+  .err{color:#b91c1c;font-size:12px;margin-top:8px;display:none}
+  hr{border:none;border-top:1px solid #eef1f8;margin:14px 0}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<h1>Calcul garde d’enfant</h1>
+
+<!-- DONNÉES -->
+<div class="card">
+<h2>Données</h2>
+
+<div class="form">
+<label>Nb jours / semaine<input id="days" value="5"></label>
+<label>Nb heures / jour<input id="hours" value="8,4"></label>
+<label>Nb semaines / an<input id="weeks" value="52"></label>
+<label>Tarif AM net €/h<input id="rate" value="4"></label>
+<label>Entretien €/jour<input id="entretien" value="4"></label>
+<label>Repas €/jour<input id="repas" value="0"></label>
+</div>
+
+<div class="row">
+<button class="primary" onclick="calc()">Calculer</button>
+<button class="ghost" onclick="resetAll()">Réinitialiser</button>
+</div>
+
+<div class="err" id="err"></div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="card">
+<h2>Résultats</h2>
+
+<div class="results-grid">
+  <div class="kpi">
+    <div class="t">Tarif de garde — SANS repas</div>
+    <div class="v" id="totalSans">—</div>
+  </div>
+
+  <div class="kpi">
+    <div class="t">Tarif de garde — AVEC repas</div>
+    <div class="v" id="totalAvec">—</div>
+  </div>
+
+  <div class="kpi">
+    <div class="t">Reste à charge — SANS repas</div>
+    <div class="v" id="resteSans">—</div>
+  </div>
+
+  <div class="kpi">
+    <div class="t">Reste à charge — AVEC repas</div>
+    <div class="v" id="resteAvec">—</div>
+  </div>
+</div>
+</div>
+
+<!-- PARAMÈTRES CAF -->
+<div class="card">
+<h2>Paramètres CAF</h2>
+
+<div class="form">
+<label>Plafond CAF €/jour<input id="cafCap" value="46"></label>
+
+<label>Ressources
+<select id="ressources">
+<option value="1">≤ 30 687 €</option>
+<option value="2">30 687 € – 68 199 €</option>
+<option value="3">&gt; 68 199 €</option>
+</select>
+</label>
+</div>
+
+<hr>
+
+<div class="results-grid">
+<div class="kpi">
+<div class="t">Catégorie 1</div>
+<input id="caf1" value="538,28">
+</div>
+<div class="kpi">
+<div class="t">Catégorie 2</div>
+<input id="caf2" value="339,42">
+</div>
+<div class="kpi">
+<div class="t">Catégorie 3</div>
+<input id="caf3" value="203,63">
+</div>
+</div>
+
+<div class="hint">
+Tu peux modifier les montants CAF ici sans toucher aux calculs.
+</div>
+</div>
+
+</div>
+
+<script>
+function n(v){return Number(String(v).replace(',','.'))||0}
+
+function calc(){
+let d=n(days.value), h=n(hours.value), w=n(weeks.value)
+let r=n(rate.value), e=n(entretien.value), m=n(repas.value)
+let cap=n(cafCap.value)
+
+if(h<=0){
+  err.style.display="block";
+  err.innerText="Heures invalides";
+  return;
+}
+err.style.display="none";
+
+let heuresMois=d*h*w/12;
+let salaire=r*heuresMois;
+let entretienMois=d*e*4;
+let repasMois=d*m*4;
+
+let sans=salaire+entretienMois;
+let avec=sans+repasMois;
+
+let cafHoraire=cap/h;
+let diffCAF=salaire-(cafHoraire*heuresMois);
+
+let caf=[0,n(caf1.value),n(caf2.value),n(caf3.value)];
+let remb=caf[ressources.value];
+
+totalSans.innerText=sans.toFixed(2)+" €";
+totalAvec.innerText=avec.toFixed(2)+" €";
+resteSans.innerText=(sans-remb+diffCAF).toFixed(2)+" €";
+resteAvec.innerText=(avec-remb+diffCAF).toFixed(2)+" €";
+}
+
+function resetAll(){
+document.querySelectorAll("input").forEach(i=>i.value=i.defaultValue);
+calc();
+}
+
+calc();
+</script>
+
+</body>
+</html>
