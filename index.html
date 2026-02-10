@@ -6,52 +6,36 @@
 <title>Calcul garde d’enfant</title>
 
 <style>
-  :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  body{margin:0;background:#f6f7fb;color:#111}
-  .wrap{max-width:980px;margin:0 auto;padding:16px}
-  h1{margin:0;font-size:20px}
-  h2{margin:0 0 10px;font-size:14px;opacity:.85}
+:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{margin:0;background:#f6f7fb;color:#111}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+h1{margin:0;font-size:20px}
+h2{margin:0 0 10px;font-size:14px;opacity:.85}
 
-  .card{background:#fff;border-radius:16px;padding:14px;margin-top:12px;
-        box-shadow:0 6px 22px rgba(0,0,0,.06)}
+.card{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 6px 22px rgba(0,0,0,.06)}
+.form{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:520px){.form{grid-template-columns:1fr 1fr}}
 
-  .form{display:grid;grid-template-columns:1fr;gap:10px}
-  @media(min-width:520px){.form{grid-template-columns:1fr 1fr}}
+.two-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:520px){.two-cols{grid-template-columns:1fr}}
 
-  label{display:grid;gap:6px;font-size:12px;opacity:.85}
-  input,select{
-    width:100%;padding:12px;border-radius:12px;border:1px solid #e2e6ef;
-    font-size:16px;box-sizing:border-box
-  }
+label{display:grid;gap:6px;font-size:12px;opacity:.85}
+input,select{width:100%;padding:12px;border-radius:12px;border:1px solid #e2e6ef;font-size:16px;background:#fff;box-sizing:border-box}
 
-  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-  button{border:0;border-radius:12px;padding:12px 14px;font-size:15px}
-  .primary{background:#111;color:#fff}
-  .ghost{background:#eef1f8}
+button{border:0;border-radius:12px;padding:12px 14px;font-size:15px;cursor:pointer}
+.primary{background:#111;color:#fff}
+.ghost{background:#eef1f8}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
 
-  .results-grid{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:10px;
-  }
-  @media(min-width:520px){
-    .results-grid{
-      grid-template-columns:1fr 1fr;
-    }
-  }
+.results-grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:520px){.results-grid{grid-template-columns:1fr 1fr}}
 
-  .kpi{
-    padding:12px;
-    border-radius:14px;
-    background:#f7f8ff;
-    border:1px solid #e7e9ff;
-  }
-  .kpi .t{font-size:12px;opacity:.75}
-  .kpi .v{font-size:22px;font-weight:700}
+.kpi{padding:12px;border-radius:14px;background:#f7f8ff;border:1px solid #e7e9ff}
+.kpi .t{font-size:12px;opacity:.75}
+.kpi .v{font-size:22px;font-weight:700}
 
-  .hint{font-size:12px;opacity:.7;margin-top:8px}
-  .err{color:#b91c1c;font-size:12px;margin-top:8px;display:none}
-  hr{border:none;border-top:1px solid #eef1f8;margin:14px 0}
+.hidden{display:none !important}
+hr{border:none;border-top:1px solid #eef1f8;margin:14px 0}
 </style>
 </head>
 
@@ -62,132 +46,156 @@
 
 <!-- DONNÉES -->
 <div class="card">
-<h2>Données</h2>
+  <h2>Données</h2>
 
-<div class="form">
-<label>Nb jours / semaine<input id="days" value="5"></label>
-<label>Nb heures / jour<input id="hours" value="8,4"></label>
-<label>Nb semaines / an<input id="weeks" value="52"></label>
-<label>Tarif AM net €/h<input id="rate" value="4"></label>
-<label>Entretien €/jour<input id="entretien" value="4"></label>
-<label>Repas €/jour<input id="repas" value="0"></label>
-</div>
+  <div class="form">
+    <label>Nb jours / semaine<input id="days" value="5"></label>
+    <label>Nb heures / jour<input id="hours" value="8,4"></label>
+    <label>Nb semaines / an<input id="weeks" value="52"></label>
+    <label>Tarif AM net €/h<input id="rate" value="4"></label>
+    <label>Entretien €/jour<input id="entretien" value="4"></label>
+    <label>Repas €/jour<input id="repas" value="0"></label>
+  </div>
 
-<div class="row">
-<button class="primary" onclick="calc()">Calculer</button>
-<button class="ghost" onclick="resetAll()">Réinitialiser</button>
-</div>
-
-<div class="err" id="err"></div>
+  <div class="row">
+    <button class="primary" onclick="calc()">Calculer</button>
+    <button class="ghost" onclick="resetAll()">Réinitialiser</button>
+  </div>
 </div>
 
 <!-- RÉSULTATS -->
 <div class="card">
-<h2>Résultats</h2>
+  <h2>Résultats</h2>
 
-<div class="results-grid">
-  <div class="kpi">
-    <div class="t">Tarif de garde — SANS repas</div>
-    <div class="v" id="totalSans">—</div>
+  <div class="results-grid">
+    <div class="kpi"><div class="t">Tarif SANS repas</div><div class="v" id="totalSans">—</div></div>
+    <div class="kpi"><div class="t">Tarif AVEC repas</div><div class="v" id="totalAvec">—</div></div>
+    <div class="kpi"><div class="t">Reste à charge SANS repas</div><div class="v" id="resteSans">—</div></div>
+    <div class="kpi"><div class="t">Reste à charge AVEC repas</div><div class="v" id="resteAvec">—</div></div>
   </div>
-
-  <div class="kpi">
-    <div class="t">Tarif de garde — AVEC repas</div>
-    <div class="v" id="totalAvec">—</div>
-  </div>
-
-  <div class="kpi">
-    <div class="t">Reste à charge — SANS repas</div>
-    <div class="v" id="resteSans">—</div>
-  </div>
-
-  <div class="kpi">
-    <div class="t">Reste à charge — AVEC repas</div>
-    <div class="v" id="resteAvec">—</div>
-  </div>
-</div>
 </div>
 
 <!-- PARAMÈTRES CAF -->
 <div class="card">
-<h2>Paramètres CAF</h2>
+  <h2>Paramètres CAF</h2>
 
-<div class="form">
-<label>Plafond CAF €/jour<input id="cafCap" value="46"></label>
+  <div class="form">
+    <label>Plafond CAF €/jour<input id="cafCap" value="46"></label>
+  </div>
 
-<label>Ressources
-<select id="ressources">
-<option value="1">≤ 30 687 €</option>
-<option value="2">30 687 € – 68 199 €</option>
-<option value="3">&gt; 68 199 €</option>
-</select>
-</label>
-</div>
+  <div class="two-cols">
+    <label>Situation
+      <select id="situation">
+        <option value="1">Seul</option>
+        <option value="2" selected>Couple</option>
+      </select>
+    </label>
 
-<hr>
+    <label>Ressources
+      <select id="ressources">
+        <option value="1">—</option>
+        <option value="2">—</option>
+        <option value="3">—</option>
+      </select>
+    </label>
+  </div>
 
-<div class="results-grid">
-<div class="kpi">
-<div class="t">Catégorie 1</div>
-<input id="caf1" value="538,28">
-</div>
-<div class="kpi">
-<div class="t">Catégorie 2</div>
-<input id="caf2" value="339,42">
-</div>
-<div class="kpi">
-<div class="t">Catégorie 3</div>
-<input id="caf3" value="203,63">
-</div>
-</div>
+  <hr>
 
-<div class="hint">
-Tu peux modifier les montants CAF ici sans toucher aux calculs.
-</div>
+  <div class="results-grid">
+    <div class="kpi caf-seul"><div class="t">CAF Seul – Cat 1 (€)</div><input id="cafS1" value="699,76"></div>
+    <div class="kpi caf-seul"><div class="t">CAF Seul – Cat 2 (€)</div><input id="cafS2" value="441,25"></div>
+    <div class="kpi caf-seul"><div class="t">CAF Seul – Cat 3 (€)</div><input id="cafS3" value="264,71"></div>
+
+    <div class="kpi caf-couple"><div class="t">CAF Couple – Cat 1 (€)</div><input id="cafC1" value="538,28"></div>
+    <div class="kpi caf-couple"><div class="t">CAF Couple – Cat 2 (€)</div><input id="cafC2" value="339,42"></div>
+    <div class="kpi caf-couple"><div class="t">CAF Couple – Cat 3 (€)</div><input id="cafC3" value="203,63"></div>
+  </div>
 </div>
 
 </div>
 
 <script>
-function n(v){return Number(String(v).replace(',','.'))||0}
+function n(v){return Number(String(v).replace(/\s/g,'').replace(',','.'))}
+function money(x){return isFinite(x)?x.toFixed(2).replace('.',',')+" €":"—"}
+function fmtInt(v){return new Intl.NumberFormat("fr-FR",{maximumFractionDigits:0}).format(v)}
+
+const THR_SEUL_1 = 33464;
+const THR_SEUL_2 = 74367;
+const THR_COUPLE_1 = 30687;
+const THR_COUPLE_2 = 68199;
+
+function toggleCAF(){
+  const s = document.getElementById("situation").value;
+  document.querySelectorAll(".caf-seul").forEach(e=>e.classList.toggle("hidden", s==="2"));
+  document.querySelectorAll(".caf-couple").forEach(e=>e.classList.toggle("hidden", s==="1"));
+}
+
+function updateRessourcesLabels(){
+  const s = document.getElementById("situation").value;
+  const sel = document.getElementById("ressources");
+
+  const t1 = (s==="1") ? THR_SEUL_1 : THR_COUPLE_1;
+  const t2 = (s==="1") ? THR_SEUL_2 : THR_COUPLE_2;
+
+  sel.options[0].text = `Inférieures ou égales à ${fmtInt(t1)} €`;
+  sel.options[1].text = `Supérieures à ${fmtInt(t1)} € et inférieures ou égales à ${fmtInt(t2)} €`;
+  sel.options[2].text = `Supérieures à ${fmtInt(t2)} €`;
+}
+
+function refund(){
+  const cat = document.getElementById("ressources").value;
+  const pick = (a,b,c)=>cat==="1"?a:cat==="2"?b:c;
+
+  return situation.value==="1"
+    ? pick(n(cafS1.value),n(cafS2.value),n(cafS3.value))
+    : pick(n(cafC1.value),n(cafC2.value),n(cafC3.value));
+}
 
 function calc(){
-let d=n(days.value), h=n(hours.value), w=n(weeks.value)
-let r=n(rate.value), e=n(entretien.value), m=n(repas.value)
-let cap=n(cafCap.value)
+  const d=n(days.value),h=n(hours.value),w=n(weeks.value),
+        r=n(rate.value),e=n(entretien.value),m=n(repas.value),cap=n(cafCap.value);
+  if([d,h,w,r,e,m,cap].some(isNaN) || h<=0) return;
 
-if(h<=0){
-  err.style.display="block";
-  err.innerText="Heures invalides";
-  return;
-}
-err.style.display="none";
+  const hm=d*h*w/12;
+  const salaire=r*hm;
+  const ent=d*e*4;
+  const rep=d*m*4;
 
-let heuresMois=d*h*w/12;
-let salaire=r*heuresMois;
-let entretienMois=d*e*4;
-let repasMois=d*m*4;
+  const sans=salaire+ent;
+  const avec=sans+rep;
 
-let sans=salaire+entretienMois;
-let avec=sans+repasMois;
+  const diff=salaire-(cap/h*hm);
+  const remb=refund();
 
-let cafHoraire=cap/h;
-let diffCAF=salaire-(cafHoraire*heuresMois);
-
-let caf=[0,n(caf1.value),n(caf2.value),n(caf3.value)];
-let remb=caf[ressources.value];
-
-totalSans.innerText=sans.toFixed(2)+" €";
-totalAvec.innerText=avec.toFixed(2)+" €";
-resteSans.innerText=(sans-remb+diffCAF).toFixed(2)+" €";
-resteAvec.innerText=(avec-remb+diffCAF).toFixed(2)+" €";
+  totalSans.innerText=money(sans);
+  totalAvec.innerText=money(avec);
+  resteSans.innerText=money(sans-remb+diff);
+  resteAvec.innerText=money(avec-remb+diff);
 }
 
 function resetAll(){
-document.querySelectorAll("input").forEach(i=>i.value=i.defaultValue);
-calc();
+  document.querySelectorAll("input").forEach(i=>i.value=i.defaultValue);
+  situation.value="2";
+  ressources.value="2";
+  toggleCAF();
+  updateRessourcesLabels();
+  calc();
 }
 
+function refresh(){
+  toggleCAF();
+  updateRessourcesLabels();
+  calc();
+}
+
+document.querySelectorAll("input,select").forEach(e=>{
+  e.addEventListener("input", refresh);
+  e.addEventListener("change", refresh);
+});
+
+toggleCAF();
+updateRessourcesLabels();
 calc();
 </script>
 
